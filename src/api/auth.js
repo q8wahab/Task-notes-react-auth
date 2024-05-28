@@ -1,13 +1,28 @@
 import instance from ".";
 
+const checkToken = () => {
+  const token = localStorage.getItem("token");
+  if (token) {
+    return true;
+  }
+  return false;
+};
 const login = async (userInfo) => {
   const { data } = await instance.post("/auth/login", userInfo);
+  storeToken(data.token);
   return data;
 };
 
 const register = async (userInfo) => {
-  const { data } = await instance.post("/auth/register", userInfo);
+  const formData = new FormData();
+  for (const key in userInfo) formData.append(key, userInfo[key]);
+
+  const { data } = await instance.post("/auth/register", formData);
+  storeToken(data.token);
   return data;
+};
+const storeToken = (token) => {
+  localStorage.setItem("token", token);
 };
 
 const me = async () => {
@@ -20,4 +35,8 @@ const getAllUsers = async () => {
   return data;
 };
 
-export { login, register, me, getAllUsers };
+const logout = () => {
+  localStorage.removeItem("token");
+};
+
+export { login, register, me, getAllUsers, storeToken, checkToken, logout };
